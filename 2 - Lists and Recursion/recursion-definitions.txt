@@ -1,0 +1,116 @@
+#lang racket
+
+(define (check-temps1 temps)
+  (check-temps temps 5 95))
+
+(define (check-temps temps low high)
+  (if (empty? temps)
+      true
+      (if (> low high)
+          false
+          (and
+           (if (> (first temps) high) false true)
+           (if (< (first temps) low) false true)
+           (if (check-temps1 (rest temps)) true false)))))
+
+(define (convert digits)
+  (if (empty? digits)
+      0
+      (+ (first digits) (* 10 (convert(rest digits))))))
+
+(define  (duple lst)
+  (if (not (empty? lst))
+      (cons (list (first lst) (first lst)) (duple (rest lst)))
+  empty))
+
+(define (sum-list lst)
+    (if (empty? lst)
+      0
+      (+ (first lst) (sum-list (rest lst)))))
+
+(define (count-list-elems lst)
+  (if (empty? lst)
+      0
+      (+ 1 (count-list-elems (rest lst)))))
+
+(define (average lst)
+  (/ (sum-list lst) (count-list-elems lst)))
+
+
+(define (convertFC temps)
+  (if (not (empty? temps))
+      (cons (* (- (first temps) 32) (/ 5 9)) (convertFC (rest temps)))
+  empty))
+
+
+(define (is-smallest? lst val)
+  (if (empty? lst)
+      true
+      (if (> val (first lst))
+          false
+          (is-smallest? (rest lst) val))))
+
+(define (eliminate-larger lst)
+    (if (empty? lst)
+        null
+        (if (is-smallest? (rest lst) (first lst))
+            (cons (first lst) (eliminate-larger (rest lst)))
+            (eliminate-larger (rest lst)))))
+        
+(define (get-nth lst n)
+  (if (= n 0)
+      (first lst)
+      (get-nth (rest lst) (- n 1))))
+
+(define (find-item-with-index index lst target)
+  (if (empty? lst)
+      -1
+      (if(= (first lst) target)
+         index
+         (find-item-with-index (+ index 1) (rest lst) target))))
+
+(define (find-item lst target)
+      (find-item-with-index 0 lst target))
+
+(define pass-list (list 80 92 56))
+(define fail-list (list 80 99 56))
+(define temp-tests (list pass-list fail-list))
+(define hiTemp 95)
+(define loTemp 5)
+(define convert-list-1 (list 1 2 3))
+(define convert-list-2 (list 3 2 1))
+(define convert-list-3 (list 0 0 1))
+(define convert-list-4 (list 1 0 0))
+(define convert-tests (list convert-list-1 convert-list-2 convert-list-3))
+(define duple-test (list 1 2 3))
+(define average-test (list 1 2 3 4))
+(define convertFC-test (list 32 50 212))
+(define eliminate-test (list 1 2 3 9 4 5))
+(define get-nth-test (list 1 2 3 4))
+(define find-item-test (list 1 2 3 4))
+
+(equal? #t (check-temps1 pass-list))
+(equal? #f (check-temps1 fail-list))
+
+(equal? #t (check-temps pass-list loTemp hiTemp))
+(equal? #f (check-temps fail-list loTemp hiTemp))
+
+(equal? 321 (convert convert-list-1))
+(equal? 123 (convert convert-list-2))
+(equal? 100 (convert convert-list-3))
+(equal? 1 (convert convert-list-4))
+
+(equal? '((1 1) (2 2) (3 3)) (duple duple-test))
+(equal? '((80 80) (92 92) (56 56)) (duple pass-list))
+(equal? '((80 80) (99 99) (56 56)) (duple fail-list))
+
+(equal? 2 1/2 (average average-test))
+
+(equal? '(0 10 100) (convertFC convertFC-test))
+
+(equal? '(1 2 3 4 5) (eliminate-larger eliminate-test))
+
+(equal? 3 (get-nth get-nth-test 2))
+
+(equal? 2 (find-item find-item-test 3))
+(equal? -1 (find-item find-item-test 42))
