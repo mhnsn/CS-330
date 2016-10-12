@@ -1,12 +1,5 @@
 #lang racket
 
-;
-;Required definitions for lab:
-;  default-parms
-;  type-parms
-;  new-sin2
-;
-
 (define debugMode #t)
 
 (define (default-parms f values)
@@ -42,7 +35,6 @@
     (list 0 'radians)))
 
 
-; 0. some definitions for testing
 (define f +)
 (define g (default-parms f (list 42 99)))
 
@@ -73,7 +65,6 @@
                           1.0
                           ))
 
-; attempting to make my own test driver?
 (define (do-all-tests funcs test-cases expected-results)
   (andmap
    (lambda (test input result)

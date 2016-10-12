@@ -1,0 +1,178 @@
+#lang racket
+
+(define debugMode #t)
+
+(define (convertFC temps)
+  (map
+   (lambda (F) (* (- F 32) (/ 5 9)))
+   temps))
+
+(define (check-temps1 temps)
+  (check-temps temps 5 95))
+
+(define (check-temps temps low high)
+  (andmap
+   (lambda (T) (and (> 95 high) (> 5 low)) temps)
+   temps)
+  #f
+  #t)
+
+(define (convert digits)
+  (foldr
+   (lambda (a b result) (+ a (* 10 result)))
+   0
+   digits
+   digits))
+
+(define (duple lst)
+  (map
+   (lambda (F) (list F F))
+   lst))
+
+(define (count-list-elems lst)
+  (if (empty? lst)
+      0
+      (+ 1 (count-list-elems (rest lst)))))
+
+(define (average lst)
+  (/ (foldr + 0 lst) (count-list-elems lst)))
+
+(define (smaller-than-all-following? lst val)
+  (if (empty? lst)
+      true
+      (if (> val (first lst))
+          false
+          (smaller-than-all-following? (rest lst) val))))
+  
+(define (eliminate-larger lst)
+  (foldr
+   (lambda (x y result)
+     (if (< x (first result))
+         (cons x result)
+         result))
+   (list (last lst))
+   lst
+   lst))
+
+(define (((curry2 func) arg1) arg2)
+  (func arg1 arg2))
+
+(define convertFC-test (list 32 50 212))
+(define pass-list (list 80 92 56))
+(define fail-list (list 80 99 56))
+(define hiTemp 95)
+(define loTemp 5)
+(define convert-list-1 (list 1 2 3))
+(define convert-list-2 (list 3 2 1))
+(define convert-list-3 (list 0 0 1))
+(define convert-list-4 (list 1 0 0))
+(define duple-test (list 1 2 3))
+(define average-test (list 1 2 3 4))
+(define eliminate-test (list 1 2 3 9 4 5))
+(define curry2-test-1 (((curry2 +) 3) 4))
+(define curry2-test-2 (((curry2 -) 3) 4))
+(define curry2-test-3 (((curry2 *) 3) 4))
+(define curry2-test-4 (((curry2 /) 3) 4))
+
+
+(define functions (list
+                 convertFC     
+                 check-temps1
+                 check-temps1
+                 check-temps1
+                 check-temps1
+                 convert       
+                 convert
+                 convert
+                 convert
+                 duple
+                 duple         
+                 duple
+                 average
+                 eliminate-larger
+                 ))
+
+(define test-cases (list
+                    convertFC-test  
+                    pass-list
+                    fail-list
+                    pass-list
+                    fail-list
+                    convert-list-1  
+                    convert-list-2
+                    convert-list-3  
+                    convert-list-4
+                    duple-test
+                    pass-list       
+                    fail-list
+                    average-test
+                    eliminate-test
+                    ))
+
+(define expected-results (list
+                          '(0 10 100)
+                          #t
+                          #f
+                          #t
+                          #f
+                          321
+                          123
+                          100
+                          1
+                          '((1 1) (2 2) (3 3))
+                          '((80 80) (92 92) (56 56))
+                          '((80 80) (99 99) (56 56))
+                          2 1/2
+                          '(1 2 3 4 5)
+                          ))
+
+(define (do-all-tests funcs test-cases expected-results)
+  (andmap
+   (lambda (test input result)
+     (if (equal? (test input) result)
+         (writeln"               TEST PASSED!                   ||")
+         (map
+          (lambda (test input result)
+            (if (equal? (test input) result)
+                #t
+                (test input)))
+          funcs
+          test-cases
+          expected-results)))
+  funcs
+  test-cases
+  expected-results))
+
+
+(define write-test-driver-footer-str
+  (and (writeln"==============================================||")
+       #t))
+
+(if (and #t debugMode)
+    (and (writeln"  (SADLY MY DRIVER DOESN'T HANDLE CURRY YET)  ||")
+          (writeln"           SO THE TESTS ARE SEPARATE          ||")
+          (writeln"==============================================||")
+          (writeln"        BEGIN MY OWN TEST BENCH DRIVER        ||")
+          (writeln"                                              ||")
+          (do-all-tests functions test-cases expected-results)
+          (writeln"                                              ||")
+          (writeln"==============================================||")
+          (writeln"                CURRY TESTS                   ||")
+          (writeln"==============================================||"))
+
+    (and ""))
+
+(if (equal? 7  curry2-test-1)
+    #t
+    curry2-test-1)
+(if (equal? -1 curry2-test-2)
+    #t
+    curry2-test-2)
+(if (equal? 12 curry2-test-3)
+    #t
+    curry2-test-3)
+(if (equal? 3/4  curry2-test-4)
+    #t
+    curry2-test-4)
+
+(writeln"==============================================||")
