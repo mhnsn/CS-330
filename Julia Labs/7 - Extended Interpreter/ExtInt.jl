@@ -125,7 +125,7 @@ end
 
 function pp( ast::FuncApp, depth::Int )
     print( "(" )
-    pp( ast.fun_expr, depth+1 )
+    pp( ast.func_expr, depth+1 )
     print( " " )
     pp( ast.arg_expr, depth+1 )    
     print( ")" )
@@ -138,6 +138,7 @@ end
 function pp( ast::Binop, depth::Int )
     print( "(" )
     print(ast.op)
+    print(" ")
     pp( ast.lhs, depth+1 )
     print( " " )
     pp( ast.rhs, depth+1 )    
@@ -147,6 +148,7 @@ end
 function pp( ast::Unop, depth::Int )
     print( "(" )
     print(ast.op)
+    print(" ")
     pp( ast.erand, depth+1 )
     print( ")" )
 end
@@ -231,7 +233,13 @@ end
 		      lhs = parse( expr[2] )
 		      rhs = parse( expr[3] )
 		  else
-		    println(op_symbol)
+		    print("(")
+		    print(op_symbol)
+  		    print(" ")		    
+		    println(expr[2])
+		    print(" ")
+  		    println(expr[3])
+		    print(")")
 		    throw( LispError("SYNTAX ERROR: Unknown binary operation!") )
           end
 		  return Binop( Dict(op_symbol), lhs, rhs )
@@ -278,6 +286,7 @@ end
       ast = parse(lexed)
       
       pp( ast, 0 );
+      println()
       
       return calc(ast)
     end
@@ -296,39 +305,39 @@ end
 	  rhrVal = calc(op.rhs, env)
 	  
 	  if     todo == :+
-	    if typeof(lhrVal == NumVal) && typeof(rhrVal == NumVal)
-	      return NumVal(lhrVal + rhrVal)
-	    else
-	      throw( LispError("RUNTIME ERROR: Did not get back numbers to add!") )
-	    end
+#	    if typeof(lhrVal == NumVal) && typeof(rhrVal == NumVal)
+	      return NumVal(lhrVal.n + rhrVal.n)
+#	    else
+#	      throw( LispError("RUNTIME ERROR: Did not get back numbers to add!") )
+#	    end
 	  elseif todo == :-
-  	    if typeof(lhrVal == NumVal) && typeof(rhrVal == NumVal)    
+#  	    if typeof(lhrVal == NumVal) && typeof(rhrVal == NumVal)    
   	      return NumVal(lhrVal.n - rhrVal.n)
-  	    else
-	      throw( LispError("RUNTIME ERROR: Did not get back numbers to subtract!") )
-	    end
+#  	    else
+#	      throw( LispError("RUNTIME ERROR: Did not get back numbers to subtract!") )
+#	    end
 	  elseif todo == :*
-  	    if typeof(lhrVal == NumVal) && typeof(rhrVal == NumVal)
+ # 	    if typeof(lhrVal == NumVal) && typeof(rhrVal == NumVal)
   	      return NumVal(lhrVal.n * rhrVal.n)
-  	    else
-  	      throw( LispError("RUNTIME ERROR: Did not get back numbers to multiply!") )
-  	    end
+#  	    else
+#  	      throw( LispError("RUNTIME ERROR: Did not get back numbers to multiply!") )
+#  	    end
 	  elseif todo == :/
-	    if rhrVal.n == 0
-	      throw( LispError("RUNTIME ERROR: Attempting to divide by zero!") )
-	    else
-	      if typeof(lhrVal == NumVal) && typeof(rhrVal == NumVal)
+#	    if rhrVal.n == 0
+#	      throw( LispError("RUNTIME ERROR: Attempting to divide by zero!") )
+#	    else
+#	      if typeof(lhrVal == NumVal) && typeof(rhrVal == NumVal)
 	        return NumVal(lhrVal.n / rhrVal.n)
-	      else
-	        throw( LispError("RUNTIME ERROR: Did not get back numbers to divide!") )
-	      end
-	    end
+#	      else
+#	        throw( LispError("RUNTIME ERROR: Did not get back numbers to divide!") )
+#	      end
+#	    end
 	  elseif todo == :mod
-  	    if typeof(lhrVal == NumVal) && typeof(rhrVal == NumVal)
+#  	    if typeof(lhrVal == NumVal) && typeof(rhrVal == NumVal)
   	      return NumVal(mod(lhrVal.n, rhrVal.n))
-  	    else
-  	      throw( LispError("RUNTIME ERROR: Did not get back numbers for mod!") )	      
-  	    end
+#  	    else
+#  	      throw( LispError("RUNTIME ERROR: Did not get back numbers for mod!") )	      
+#  	    end
 	  else
 	      throw( LispError("Trying to calc invalid Binop!?") )
 	  end
@@ -339,21 +348,21 @@ end
   	  rVal = calc(op.erand, env)
 	  
 	  if todo == :-
-  	    if typeof(rVal == NumVal)
+#  	    if typeof(rVal == NumVal)
           return NumVal(-rVal.n)
-  	    else
-  	      throw( LispError("RUNTIME ERROR: Did not get back number to take negative!") )
-  	    end
+#  	    else
+#  	      throw( LispError("RUNTIME ERROR: Did not get back number to take negative!") )
+#  	    end
 	  elseif todo == :collatz
-  	    if typeof(rVal == NumVal)
-		    if rVal.n < 0
-		      throw( LispError("RUNTIME ERROR: Attempting to collatz a negative number!") )
-		    else
+ # 	    if typeof(rVal == NumVal)
+#		    if rVal.n < 0
+#		      throw( LispError("RUNTIME ERROR: Attempting to collatz a negative number!") )
+#		    else
 		      return NumVal(collatz(rVal.n, env))
-		    end
-	    else
+#		    end
+#	    else
   	      throw( LispError("RUNTIME ERROR: Did not get back number for collatz!") )
-	    end
+#	    end
 	  else
 	      throw( LispError("Trying to calc invalid Unop!?") )
 	  end
@@ -390,7 +399,7 @@ end
 	
 	function calc( ae::Id, env::Environment )
 	  if env == mtEnv()
-	    throw( LispError( "SYNTAX ERROR: WARGH! Couldn't find symbol!" ) )
+	    throw( LispError( "SYNTAX ERROR: WARGH! Couldn't find symbol! Likely syntax or spelling error." ) )
 	  elseif env.name == ae.name
 	    return env.value
 	  else
@@ -404,7 +413,7 @@ end
     
     function calc( func::FuncApp, env::Environment )
 	    # the function expression should result in a closure
-	    closure = calc( func.fun_expr, env )
+	    closure = calc( func.func_expr, env )
 	
 	    if typeof( closure ) != ClosureVal
 	        throw( LispError( "Attempting to call a non-function as a function!" ) )
@@ -469,7 +478,7 @@ end
 	              println( ast )
 	              println( ">> ERROR: rethrowing error" )
 	              println(errobj)
-	              #throw( errobj )
+	              throw( errobj )
 	          end
 	          println( "------------ done -------------" )
 	          println( "" )          
