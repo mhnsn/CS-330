@@ -28,39 +28,29 @@
 
 import Prelude
 
-main = primeChecker 7
-
-iSqrt :: Int -> Int
-iSqrt n = floor(sqrt(fromIntegral n))
-
-primeChecker :: Int -> IO()
-primeChecker s = if isPrime s
-					then putStrLn $ "Yes!"
-					else putStrLn $ "No!"
-
 -- Part 1: Primes ---------------------------------------------------------------
-
-isMod0 a b = if (a mod b) == 0
-				then True
-				else False
 
 -- isPrime ----------------------------------------------------------------------
 -- Type Signature ---------------------------------------------------------------
 isPrime :: Int -> Bool
-isPrime n = foldl (\a n -> (a mod n) == 0) False [1...sqrt(n)]
-		--  foldl (bool -> int  -> bool) 				-> bool -> [int]   	-> bool
-		--  foldl (a 	-> b 	-> a) 	 				-> a 	-> [b] 		-> a
+isPrime a = null [b | b <- makePrimeCheckArray a, isMod0 a b]
 
-		
-foldl (bool -> bool  -> bool)	-> bool -> [bool]   	-> bool
+-- Some helpers
+makePrimeCheckArray :: Int -> [Int]
+makePrimeCheckArray n = takeWhile (<= iSqrt n) [2.. ]
 
-isDivisibleBy :: Int		
+iSqrt :: Int -> Int
+iSqrt n = floor(sqrt(fromIntegral n))
 
+isMod0 :: Int -> Int -> Bool
+isMod0 a b = if (a `mod` b) == 0
+				then True
+				else False
 
 -- primes -----------------------------------------------------------------------
 -- Type Signature ---------------------------------------------------------------
 primes :: [Int]
-primes = [0]
+primes = [x | x <- [2.. ], isPrime x]
 
 -- Useful helper functions - the first defined above, the second from Haskell libs
 -- isPrime :: Int -> Bool
@@ -69,16 +59,27 @@ primes = [0]
 -- isPrimeFast ------------------------------------------------------------------
 -- Type Signature ---------------------------------------------------------------
 isPrimeFast :: Int -> Bool
-isPrimeFast n = if(isPrime n)
-				then True
-				else False
+isPrimeFast 2 = True
+isPrimeFast a = null [b | b <- (takeWhile (<= iSqrt a) primesFast), isMod0 a b]
 
 -- primesFast -------------------------------------------------------------------
 -- Type Signature ---------------------------------------------------------------
 primesFast :: [Int]
-primesFast = [2]
+primesFast = [x | x <- [2..], isPrimeFast x]
 
 -- Part 2: Longest Common Subsequence -------------------------------------------
 -- Type Signature ---------------------------------------------------------------
+
 lcsLength :: String -> String -> Int
-lcsLength = 0
+lcsLength a b = length (lcs a b)
+
+lcs :: String -> String -> String
+lcs a b
+	| ( (length a == 0) || (length b == 0) ) = ""
+	| (last a == last b ) = (lcs (init a) (init b)) ++ [last a]
+	| (last a /= last b ) = longest (lcs (init a) b) (lcs a (init b))
+	
+longest :: String -> String -> String
+longest a b = if length a > length b
+				then a
+				else b
