@@ -41,9 +41,10 @@ solve :-
     % 1. The tie with the grinning leprechauns wasn't a present from a daughter.
     %The underscore, _, is a variable that could unify with anything, and you don't care what.
     \+ member([_, leprechauns, daughter], Triples),
-%Negation isn't difficult, but it's tricky. Here's what you need to remember about negation:
-%Whether negation succeeds or fails, it cannot ever unify (instantiate) anything.
-%You can use negation to prevent certain unifications, as above, but you cannot use it to find out anything.
+	%Negation isn't difficult, but it's tricky. Here's what you need to remember about negation:
+	%Whether negation succeeds or fails, it cannot ever unify (instantiate) anything.
+	%You can use negation to prevent certain unifications, as above, but you cannot use it to find out anything.
+
     % 2. Mr. Crow's tie features neither the dancing reindeer nor the yellow happy faces.
     \+ member([crow, reindeer, _], Triples),
     \+ member([crow, happy_faces, _], Triples),
@@ -72,9 +73,9 @@ solve :-
  
 % Succeeds if all elements of the argument list are bound and different.
 % Fails if any elements are unbound or equal to some other element.
+all_different([_]).
 all_different([H | T]) :- member(H, T), !, fail.
 all_different([_ | T]) :- all_different(T).
-all_different([_]).
  
 tell(X, Y, Z) :-
     write('Mr. '), write(X), write(' got the '), write(Y),
