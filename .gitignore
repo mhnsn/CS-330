@@ -49,3 +49,5 @@ Temporary Items
 *.hi
 *.o
 *.zip
+*.beam
+*.dump

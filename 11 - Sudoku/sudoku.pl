@@ -102,9 +102,6 @@ getCube(Board, Number, AsList) :-
  
 % ---- PUT CODE HERE ---
 % ---- PUT CODE HERE ---
-boardRows(Board,Rows) :-
-	Rows = Board.
-	
 makeCubeStrings(Board, AsList) :-
 	Cubes = [Cub0, Cub1, Cub2, Cub3, Cub4, Cub5, Cub6, Cub7, Cub8],
 	getCube(Board,0,Cub0),
@@ -116,24 +113,14 @@ makeCubeStrings(Board, AsList) :-
 	getCube(Board,6,Cub6),
 	getCube(Board,7,Cub7),
 	getCube(Board,8,Cub8),
-	append(Cub0,S0),
-	append(Cub1,S1),
-	append(Cub2,S2),
-	append(Cub3,S3),
-	append(Cub4,S4),
-	append(Cub5,S5),
-	append(Cub6,S6),
-	append(Cub7,S7),
-	append(Cub8,S8),
-	AsList = [S0, S1, S2, S3, S4, S5, S6, S7, S8].
+	AsList = [Cub0, Cub1, Cub2, Cub3, Cub4, Cub5, Cub6, Cub7, Cub8].
 
 assignRow(Row, Result) :- 
 	digit(A), digit(B), digit(C),
 	digit(D), digit(E), digit(F),
 	digit(G), digit(H), digit(I),
 	Row = [A, B, C, D, E, F, G, H, I],
-	is_set(Row),
-	Result = Row.
+	is_set(Row).
 	
 test :-
 	Board = [[_, _, _, 7, 9, _, 8, _, _],
@@ -148,27 +135,85 @@ test :-
 	solve(Board),
 	printBoard(Board).
 
+entries([1,2,3,4,5,6,7,8,9]).
+sigmaRow(45).
+
+isValidSum(Row, Result) :-
+	sigmaRow(FortyFive),
+	entries(Vals),
+	assignRow(Row,Result),
+	sum(Result,Vals,FortyFive).
+
+sum([],[],0).
+sum([H|T],Vals,Target) :-
+	member(H,Vals),
+	delete(H,Vals,Remaining),
+	Cur is Target - H,
+	sum(T,Remaining,Cur).
+	
+transpose([],[]).
+transpose([R|Rs],Rt)	:-
+	transpose(R,[R|Rs],Rt).
+
+transpose([],_,[]).
+transpose([_|Rs],Ms,[T|Ts])	:-
+	separateForTranspose(Ms, T, Mss),
+	transpose(Rs, Mss, Ts).
+
+separateForTranspose([], [], []).
+separateForTranspose([[F|O]|Rest], [F|Fs], [O|Os])	:-
+	separateForTranspose(Rest,Fs,Os).
+
+checkRows(Board, Result) 	:-
+	maplist(isValidSum, Board, Result),
+	maplist(is_set,Result).
+
+checkCols(Board)	:-
+	transpose(Board, Cols),
+	checkRows(Cols, _).
+
+checkCubes(Board) 	:-
+	makeCubeStrings(Board, Cubes),
+	checkRows(Cubes, _).
+	
 solve(Board) :- 
-	length(Board, 9),
-	maplist(same_length(Board), Board),
-	digit(A), digit(B), digit(C),
-	digit(D), digit(E), digit(F),
-	digit(G), digit(H), digit(I),
-	Set = [A, B, C, D, E, F, G, H, I],
-	maplist(assignRow, Board, R),
-	transpose(R,Cols),
-	maplist(is_set, Cols),
-	makeCubeStrings(R,Cubes),
-	maplist(isCorrectEntry,A,R,Cols,Cubes).
-	
-% Succeeds if all elements of the argument list are bound and different.
-% Fails if any elements are unbound or equal to some other element.
-% all_different([H | T]) :- member(H, T), !, fail.
-% all_different([_ | T]) :- all_different(T).
-% all_different([_]).
-	
+	checkRows(Board, Result),
+	checkCols(Result),
+	checkCubes(Result).
+
+testRec :-
+		B = [
+			[9,6,3,1,7,4,2,5,8],
+			[1,7,8,3,2,5,6,4,9],
+			[2,5,4,6,8,9,7,3,1],
+			[8,2,1,4,3,7,5,9,6],
+			[4,9,6,8,5,2,3,1,7],
+			[7,3,5,9,6,1,8,2,4],
+			[5,8,9,7,1,3,4,6,2],
+			[3,1,7,2,4,6,9,8,5],
+			[6,4,2,5,9,8,1,7,3]],
+			solve(B),
+			printBoard(B).
+			
+testEasy:-
+	B = [
+            [9,_,3,1,7,4,2,5,8],
+            [_,7,_,3,2,5,6,4,9],
+            [2,5,4,6,8,9,7,3,1],
+            [8,2,1,4,3,7,5,_,6],
+			[4,9,6,8,5,2,3,1,7],
+            [7,3,_,9,6,1,8,2,4],
+            [5,8,9,7,1,3,4,6,2],
+            [3,1,7,2,4,6,9,8,5],
+            [6,4,2,5,9,8,1,7,3]],
+			solve(B),
+			printBoard(B).
+
+% checkCols([[9,6,3,1,7,4,2,5,8],[1,7,8,3,2,5,6,4,9],[2,5,4,6,8,9,7,3,1],[8,2,1,4,3,7,5,9,6],[4,9,6,8,5,2,3,1,7],[7,3,5,9,6,1,8,2,4],[5,8,9,7,1,3,4,6,2],[3,1,7,2,4,6,9,8,5],[6,4,2,5,9,8,1,7,3]]).
+% makeCubeStrings([[9,6,3,1,7,4,2,5,8],[1,7,8,3,2,5,6,4,9],[2,5,4,6,8,9,7,3,1],[8,2,1,4,3,7,5,9,6],[4,9,6,8,5,2,3,1,7],[7,3,5,9,6,1,8,2,4],[5,8,9,7,1,3,4,6,2],[3,1,7,2,4,6,9,8,5],[6,4,2,5,9,8,1,7,3]], List).
+			
 isCorrectEntry(S00,Row,Col,Cub) :-
-			(nonvar(S00); var(S00), digit(S00), is_set(Row), is_set(Col), is_set(Cub)).
+	(nonvar(S00); var(S00), digit(S00), is_set(Row), is_set(Col), is_set(Cub)).
  
 % ---- PUT CODE HERE ---
 % ---- PUT CODE HERE ---
